@@ -1,0 +1,59 @@
+{% extends 'staticpages/base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Medication schedules -->
+        <div class="col-md-8">
+            <div class="medication-header mb-4">  
+                <h2>Medications for {{ resident.name }}</h2>
+                <div class="medication-actions mt-3"> 
+                    <a href="{% url 'add_medication_schedule' resident.id %}" class="btn btn-primary me-2">  
+                        <i class="fas fa-plus"></i> Add Medication
+                    </a>
+                    <a href="{% url 'generate_mar_chart' resident.id %}" class="btn btn-secondary" target="_blank">
+                        <i class="fas fa-file-pdf"></i> Generate MAR Chart
+                    </a>
+                </div>
+            </div>
+            
+            {% if schedules %}
+                <div class="row g-4">  
+                    {% for schedule in schedules %}
+                    <div class="col-md-6">  
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">  
+                                    <h5 class="card-title">{{ schedule.medication.name }}</h5>
+                                    <form method="POST" action="{% url 'delete_medication_schedule' schedule.id %}" 
+                                          onsubmit="return confirm('Are you sure you want to remove this medication?');"
+                                          style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                <p class="card-text">
+                                    <strong>Dosage:</strong> {{ schedule.dosage }}<br>
+                                    <strong>Frequency:</strong> {{ schedule.frequency }} times per day<br>
+                                    <strong>Times:</strong>
+                                    {% for time in schedule.times.all %}
+                                        {{ time.time|time:"H:i" }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No medications scheduled for this resident.</p>
+            {% endif %}
+        </div>
+
+       
+        </div>
+    </div>
+</div>
+{% endblock %}

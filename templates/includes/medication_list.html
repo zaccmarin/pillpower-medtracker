@@ -1,0 +1,35 @@
+{% for med in upcoming_meds %}
+<div class="card mb-2 medication-card {% if med.urgency == 'overdue' %}border-danger{% elif med.urgency == 'urgent' %}border-warning{% endif %}">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h5 class="card-title mb-1">{{ med.schedule.resident.name }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">
+                    {{ med.schedule.medication.name }} - {{ med.schedule.dosage }}
+                </h6>
+            </div>
+            <span class="badge {% if med.urgency == 'overdue' %}bg-danger{% elif med.urgency == 'urgent' %}bg-warning{% elif med.urgency == 'given' %}bg-success{% else %}bg-primary{% endif %}">
+                {{ med.time_slot.time|time:"g:i A" }}
+            </span>
+        </div>
+        
+        {% if not med.was_given %}
+        <form method="post" action="{% url 'record_medication' med.schedule.id med.time_slot.id %}" class="mt-2">
+            {% csrf_token %}
+            <div class="input-group">
+                <input type="text" name="notes" class="form-control form-control-sm" placeholder="Add notes (optional)">
+                <button type="submit" class="btn btn-primary btn-sm">Mark Given</button>
+            </div>
+        </form>
+        {% else %}
+        <div class="text-success mt-2">
+            <small><i class="fas fa-check"></i> Given at {{ med.given_at|time:"g:i A" }}</small>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% empty %}
+<div class="alert alert-info">
+    No medications scheduled at this time.
+</div>
+{% endfor %}

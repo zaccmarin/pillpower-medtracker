@@ -1,0 +1,139 @@
+{% extends 'staticpages/base.html' %}
+   
+    {% block content %}
+    <div class="container-fluid px-3 py-2">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Welcome, {{ carer.user.first_name }}</h4>
+            <span class="badge bg-primary" id="current-time">{{ current_time|date:"g:i A" }}</span>
+        </div>
+
+        <!-- Group Info -->
+        {% if carer.resident_group %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Your Group: {{ carer.resident_group.name }}</h5>
+                <p class="card-text">Residents: {{ residents.count }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Dropdown for actions -->
+        <div class="dropdown mb-3">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                Actions
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                {% if carer.permissions.can_edit_residents or carer.permissions.can_edit_medications %}
+                <li><a class="dropdown-item" href="{% url 'manager_dashboard_residents' %}">View residents</a></li>
+                {% endif %}
+               
+              
+                {% if carer.permissions.can_view_inventory %}
+                <li><a class="dropdown-item" href="{% url 'medication_inventory' %}">View Inventory</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="button">
+            <a href="{% url 'logout' %}" class="btn btn-primary">Logout</a>
+        </div>
+
+
+
+        <!-- Medications List -->
+        <div class="medication-list" id="medication-list">
+            {% include 'includes/medication_list.html' %}
+        </div>
+    </div>
+
+    <!-- styles to make it look better on mobile -->
+    <style>
+        
+        .medication-card {
+            transition: all 0.3s ease;
+        }
+        
+        .medication-card:active {
+            transform: scale(0.98);
+        }
+        
+    
+        .urgency-overdue {
+            background-color: #ffe6e6;
+        }
+        
+        .urgency-urgent {
+            background-color: #fff3cd;
+        }
+        
+       
+        .btn {
+            min-height: 44px;
+            padding: 0.5rem 1rem;
+        }
+        
+        
+        .form-control {
+            font-size: 16px; 
+        }
+        
+        @supports (padding: max(0px)) {
+            .container-fluid {
+                padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+    {% endblock %}
+
+    {% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to update the dashboard
+            function updateDashboard() {
+                fetch('{% url "get_dashboard_updates" %}')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error(data.error);
+                            return;
+                        }
+                        
+                        // Update the medication list
+                        document.getElementById('medication-list').innerHTML = data.html;
+                        
+                        // Update the current time
+                        document.getElementById('current-time').textContent = data.current_time;
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+    
+            // Update every 30 seconds
+            setInterval(updateDashboard, 30000); 
+    
+            // Handle form submissions 
+            document.addEventListener('submit', function(e) {
+                if (e.target.matches('.medication-card form')) {
+                    e.preventDefault();
+                    
+                    const form = e.target;
+                    const formData = new FormData(form);
+                    
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Update the dashboard immediately after recording medication
+                            updateDashboard();
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            });
+        });
+    </script>
+    {% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'staticpages/base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+    
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'medication_inventory' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Inventory
+            </a>
+            <h2 class="mb-0">Browse Medications</h2>
+        </div>
+        
+        <!-- NHS attribution -->
+        <a href="https://www.nhs.uk/medicines/" target="_blank">
+            <img src="https://assets.nhs.uk/nhsuk-cms/images/nhs-attribution.width-510.png" alt="Content supplied by the NHS website" width="510" height="99" style="width: 250px; height: 49px;" />
+          </a>
+    </div>
+    
+        <!-- error messages-->
+        {% if messages %}
+        <div class="messages z-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'danger' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <!-- end of error messages-->
+
+    <!-- A-Z Navigation -->
+    <div class="mb-4">
+        <div class="d-flex flex-wrap gap-2">
+            {% for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+                <a href="{% url 'search_medications' letter %}" 
+                   class="btn {% if letter == search_term %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    {{ letter }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="results">
+        {% if results %}
+            <div class="row">
+                {% for med in results %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    {{ med.name }}
+                                </h5>
+                                <form method="POST" action="{% url 'add_medication_to_db' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="nhs_id" value="{{ med.id }}">
+                                    <button type="submit" class="btn btn-success">Add to Database</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% elif search_term %}
+            <p>No medications found starting with "{{ search_term }}"</p>
+        {% endif %}
+    </div>
+</div>
+
+
+{% endblock %}

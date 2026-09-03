@@ -1,0 +1,60 @@
+{% extends 'staticpages/base.html' %}
+
+{% block title %}Add Medication Variant{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4>Add Variant for {{ medication.name }}</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="{{ form.dosage.id_for_label }}" class="form-label">Dosage</label>
+                    <div class="input-group">
+                        {{ form.dosage }}
+                        <span class="input-group-text">e.g. 500mg</span>
+                    </div>
+                    {% if form.dosage.errors %}
+                        <div class="text-danger">{{ form.dosage.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.form.id_for_label }}" class="form-label">Form</label>
+                    {{ form.form }}
+                    <div class="form-text">E.g. tablet, capsule, liquid, cream</div>
+                    {% if form.form.errors %}
+                        <div class="text-danger">{{ form.form.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.stock.id_for_label }}" class="form-label">Initial Stock</label>
+                    {{ form.stock }}
+                    {% if form.stock.errors %}
+                        <div class="text-danger">{{ form.stock.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.reorder_level.id_for_label }}" class="form-label">Reorder Level</label>
+                    {{ form.reorder_level }}
+                    <div class="form-text">Stock level at which to reorder</div>
+                    {% if form.reorder_level.errors %}
+                        <div class="text-danger">{{ form.reorder_level.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{% url 'medication_inventory' %}" class="btn btn-secondary me-md-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Add Variant</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

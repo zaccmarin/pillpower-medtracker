@@ -1,0 +1,57 @@
+{% extends 'staticpages/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Manage Access for {{ carer.user.get_full_name }}</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <h5>Access Duration</h5>
+                            <p class="text-muted">Set how long this carer should have access to the system.</p>
+                            
+                            <div class="mt-3">
+                                {% for radio in form.access_duration %}
+                                <div class="form-check mb-2">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                        {{ radio.choice_label }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            {% if form.access_duration.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {{ form.access_duration.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if carer.access_end_date and not carer.indefinite_access %}
+                        <div class="alert alert-info">
+                            Current access expires on: {{ carer.access_end_date|date:"d M Y, H:i" }}
+                        </div>
+                        {% elif carer.indefinite_access %}
+                        <div class="alert alert-success">
+                            This carer currently has indefinite access.
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'manager_dashboard_carers' %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

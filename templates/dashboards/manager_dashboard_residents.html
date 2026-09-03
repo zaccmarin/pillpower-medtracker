@@ -1,0 +1,155 @@
+{% extends 'staticpages/base.html' %}
+
+{% block title %}Residents - PillPower{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- error messages-->
+        {% if messages %}
+        <div class="messages z-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'danger' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Header with Add resident Button -->
+        <div class="col-12 mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Residents</h2>
+                <a href="{% url 'add_resident' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add New Resident
+                </a>
+            </div>
+        </div>
+
+        <!-- Residents List -->
+        <div class="col-md-8">
+            <div class="row g-3">
+                {% for resident in residents %}
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="row g-0">
+                            {% if resident.photo %}
+                            <div class="col-3">
+                                <img src="{{ resident.photo.url }}" 
+                                     class="img-fluid rounded-start object-fit-cover h-100" 
+                                     alt="{{ resident.name }}"
+                                     style="max-height: 120px;">
+                            </div>
+                            {% endif %}
+                            <div class="col{% if resident.photo %}-9{% endif %}">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ resident.name }}</h5>
+                                    <div class="card-text">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <strong>Age:</strong> {{ resident.calculate_age }}
+                                            </div>
+                                            <div class="col-6">
+                                                <strong>Room:</strong> {{ resident.room_number|default:"N/A" }}
+                                            </div>
+                                            <div class="col-12">
+                                                <strong>Group:</strong> {{ resident.group.name|default:"Not Assigned" }}
+                                            </div>
+                                            <div class="col-12">
+                                                <strong>Conditions:</strong>
+                                                <div class="text-muted" style="max-height: 50px; overflow-y: auto;">
+                                                    {{ resident.conditions|linebreaks|default:"None listed" }}
+                                                </div>
+                                                <strong>Allergies:</strong>
+                                                <div class="text-muted" style="max-height: 50px; overflow-y: auto;">
+                                                    {{ resident.allergies|linebreaks|default:"None listed" }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <a href="{% url 'edit_resident' resident.id %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <a href="{% url 'resident_medications' resident.id %}" class="btn btn-outline-info btn-sm">
+                                            <i class="fas fa-pills"></i> Meds
+                                        </a>
+                                        <form method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this resident?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="resident_id" value="{{ resident.id }}">
+                                            <button type="submit" name="remove_resident" class="btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-trash"></i> Remove
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <p>No residents found.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Add New Group Form -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3>Add New Group</h3>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <!-- Name field -->
+                        <div class="mb-3">
+                            <label for="{{ group_form.name.id_for_label }}" class="form-label">
+                                {{ group_form.name.label }}
+                            </label>
+                            {{ group_form.name }}
+                            {% if group_form.name.errors %}
+                            <div class="alert alert-danger">
+                                {{ group_form.name.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <!-- Color field with preview -->
+                        <div class="mb-3">
+                            <label for="{{ group_form.colour.id_for_label }}" class="form-label">
+                                {{ group_form.colour.label }}
+                            </label>
+                            <div class="d-flex align-items-center gap-2">
+                                {{ group_form.colour }}
+                                <span class="color-preview px-4 py-2 border rounded" style="background-color: {{ group_form.colour.value|default:'#FF0000' }}">
+                                    Preview
+                                </span>
+                            </div>
+                            {% if group_form.color.errors %}
+                            <div class="alert alert-danger">
+                                {{ group_form.color.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <button type="submit" name="add_group" class="btn btn-primary">Add Group</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- JS script for the colour picker -->
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const colorInput = document.querySelector('input[type="color"]');
+    const preview = document.querySelector('.color-preview');
+    
+    colorInput.addEventListener('input', function(e) {
+        preview.style.backgroundColor = e.target.value;
+    });
+});
+</script>
+{% endblock %}

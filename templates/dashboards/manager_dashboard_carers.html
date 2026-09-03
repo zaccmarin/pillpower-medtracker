@@ -1,0 +1,118 @@
+{% extends 'staticpages/base.html' %}
+
+{% block title %}Carers - PillPower{% endblock %}
+
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- error messages-->
+    {% if messages %}
+    <div class="messages z-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'danger' }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+<!-- end of error messages-->
+        <!-- Carers List -->
+        <div class="col-md-8">
+            <h2 class="mb-4">Carers</h2>
+            <div class="row">
+                {% for carer in carers %}
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ carer.user.get_full_name }}</h5>
+                            <p class="card-text">
+                                <strong>Email:</strong> {{ carer.user.email }}<br>
+                                <strong>Group:</strong> {{ carer.resident_group.name|default:"Not Assigned" }}
+                            </p>
+                            <form method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="carer_id" value="{{ carer.id }}">
+                                <select name="group_id" class="form-select mb-2">
+                                    <option value="">-- Select Group --</option>
+                                    {% for group in groups %}
+                                    <option value="{{ group.id }}" {% if carer.resident_group == group %}selected{% endif %}>
+                                        {{ group.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" name="update_carer_group" class="btn btn-primary">Update Group</button>
+                            </form>
+                            <p class="card-text mt-2">
+                                <strong>Access Status:</strong>
+                                {% if carer.indefinite_access %}
+                                    <span class="badge bg-success">Permanent Staff</span>
+                                {% elif carer.access_end_date %}
+                                    {% if carer.has_valid_access %}
+                                        <span class="badge bg-warning">Temporary (Expires: {{ carer.access_end_date|date:"d M Y" }})</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Expired</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-secondary">Not Set</span>
+                                {% endif %}
+                            </p>
+                            <div class="mt-2">
+                                <a href="{% url 'manage_carer_permissions' carer.id %}" class="btn btn-sm btn-info">
+                                    Manage Permissions
+                                </a>
+                                <a href="{% url 'manage_carer_access' carer.id %}" class="btn btn-sm btn-warning">
+                                    Manage Access
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <p>No carers found.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Care Home Code Display -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>Care Home Code</h3>
+                    <p class="lead">Share codes with carers to join your care home:</p>
+                    <div class="alert alert-info">
+                        <a href="{% url 'manage_invitation_codes' %}" class="btn btn-secondary">Manage Staff Invitations</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Groups List -->
+            <div class="card">
+                <div class="card-body">
+                    <h3>Resident Groups</h3>
+                    <ul class="list-group">
+                        {% for group in groups %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ group.name }}
+                            <span class="badge" style="background-color: {{ group.color }}">
+                                {{ group.residents.count }} residents
+                            </span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No groups created yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+{% endblock %}

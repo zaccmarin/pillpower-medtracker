@@ -1,0 +1,128 @@
+{% extends 'staticpages/base.html' %}
+<body>
+{% block title %}Dashboard - PillPower{% endblock %}
+{% block content %}
+
+    
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Manager Dashboard</h1>
+            </div>
+
+                <!-- Carehome Information -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Carehome Information</h5>
+                                <p class="card-text">Name: {{ carehome.name }}</p>
+                                <p class="card-text">Location: {{ carehome.location }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Residents</h5>
+                                <p class="card-text">Total: {{ residents_count }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Carers</h5>
+                                <p class="card-text">Total: {{ carers_count }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Medications -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Today's Medications</h5>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Resident</th>
+                                            <th>Medication</th>
+                                            <th>Dosage</th>
+                                            <th>Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for schedule in today_medications %}
+                                            {% for time in schedule.times.all %}
+                                                <tr>
+                                                    <td>{{ schedule.resident.name }}</td>
+                                                    <td>{{ schedule.medication.name }}</td>
+                                                    <td>{{ schedule.dosage }}</td>
+                                                    <td>{{ time.time|time:"H:i" }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="4">No medications scheduled for today.</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medication Stock + residents -->
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Residents</h5>
+                                <ul class="list-group">
+                                    {% for resident in residents %}
+                                        <li class="list-group-item">{{ resident.name }}</li>
+                                    {% empty %}
+                                        <li class="list-group-item">No residents found.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Medication Inventory</h5>
+                                <ul class="list-group">
+                                    {% for medication in medication_stock %}
+                                        <li class="list-group-item">
+                                            <strong>{{ medication.name }}</strong>
+                                            <ul class="list-group mt-2">
+                                                {% for item in medication.inventory_items.all %}
+                                                    <li class="list-group-item">
+                                                        {{ item.dosage }} {{ item.form }} - Stock: {{ item.stock }}
+                                                    </li>
+                                                {% empty %}
+                                                    <li class="list-group-item">No inventory items found.</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                    {% empty %}
+                                        <li class="list-group-item">No medications in inventory.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+{% endblock %}
+   
+
+
+</body>
+</html>

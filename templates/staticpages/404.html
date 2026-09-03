@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        
+        .container {
+            text-align: center;
+            position: relative;
+        }
+
+        .pill {
+            width: 200px;
+            height: 80px;
+            background: linear-gradient(90deg, #0d6efd 50%, #fff 50%);
+            border-radius: 40px;
+            position: relative;
+            margin: 20px auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .pill::before {
+            content: "404";
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            font-size: 2em;
+            color: #333;
+            line-height: 80px;
+            font-weight: bold;
+        }
+        .text {
+            margin-top: 40px;
+            color: #333;
+        }
+        .home-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #0d6efd;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            margin-top: 20px;
+        }
+        .logo {
+            width: 200px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="{% static 'img/logo-no-background.svg' %}" alt="PillPower Logo" class="logo">
+        <div class="pill"></div>
+        <div class="text">
+            <h2>Page Not Found</h2>
+            <p>Looks like this prescription doesn't exist!</p>
+            <a href="/" class="home-btn">Return Home</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,131 @@
+{% extends 'staticpages/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Add Medication Schedule - PillPower{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Add Medication Schedule for {{ resident.name }}</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="medicationForm">
+                        {% csrf_token %}
+                        
+                        <!-- Medication Selection -->
+                        <div class="mb-3">
+                            <label for="{{ form.medication.id_for_label }}" class="form-label">Medication*</label>
+                            {% render_field form.medication class="form-control" %}
+                            {% if form.medication.errors %}
+                                <div class="alert alert-danger">{{ form.medication.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Inventory Item Selection -->
+                        <div class="mb-3">
+                            <label for="{{ form.inventory_item.id_for_label }}" class="form-label">Inventory Item*</label>
+                            {% render_field form.inventory_item class="form-control" disabled="true" %}
+                            {% if form.inventory_item.errors %}
+                                <div class="alert alert-danger">{{ form.inventory_item.errors }}</div>
+                            {% endif %}
+                        </div>
+
+
+                        <!-- Route -->
+                        <div class="mb-3">
+                            <label for="{{ form.route.id_for_label }}" class="form-label">Administration Route*</label>
+                            {% render_field form.route class="form-control" %}
+                            {% if form.route.errors %}
+                                <div class="alert alert-danger">{{ form.route.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Frequency -->
+                        <div class="mb-3">
+                            <label for="{{ form.frequency.id_for_label }}" class="form-label">Times Per Day*</label>
+                            {% render_field form.frequency class="form-control" min="1" max="6" %}
+                            {% if form.frequency.errors %}
+                                <div class="alert alert-danger">{{ form.frequency.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Time inputs dynamically added  -->
+                        <div id="timeInputs" class="mb-3">
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'resident_medications' resident.id %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Schedule</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const frequencyInput = document.getElementById('{{ form.frequency.id_for_label }}');
+    
+    function updateTimeInputs() {
+        const frequency = parseInt(frequencyInput.value);
+        const timeInputs = document.getElementById('timeInputs');
+        timeInputs.innerHTML = '<h5 class="mb-3">Administration Times*</h5>';
+        
+        for(let i = 0; i < frequency; i++) {
+            const div = document.createElement('div');
+            div.className = 'mb-3';
+            div.innerHTML = `
+                <label class="form-label">Time ${i + 1}</label>
+                <input type="time" name="times[]" class="form-control" required>
+            `;
+            timeInputs.appendChild(div);
+        }
+    }
+    
+    frequencyInput.addEventListener('change', updateTimeInputs);
+    
+    
+    if (frequencyInput.value) {
+        updateTimeInputs();
+    }
+
+    const medicationSelect = document.getElementById('{{ form.medication.id_for_label }}');
+    const inventoryItemSelect = document.getElementById('{{ form.inventory_item.id_for_label }}');
+    
+    medicationSelect.addEventListener('change', function() {
+        const medicationId = this.value;
+        if (medicationId) {
+            fetch(`/api/medication/${medicationId}/inventory-items/`)
+                .then(response => response.json())
+                .then(data => {
+                    // Clear existing options
+                    inventoryItemSelect.innerHTML = '';
+                    
+                    // Add new options
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.id;
+                        option.textContent = `${item.dosage} ${item.form} (Stock: ${item.stock})`;
+                        inventoryItemSelect.appendChild(option);
+                    });
+                    
+                    //enable selection
+                    inventoryItemSelect.disabled = false;
+                });
+        } else {
+            // Disable and clear the inventory item select if no medication is selected
+            inventoryItemSelect.disabled = true;
+            inventoryItemSelect.innerHTML = '';
+        }
+    });
+});
+</script>
+{% endblock %}

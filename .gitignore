@@ -1,0 +1,34 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+
+# Django local state
+.env
+*.sqlite3
+/NEA Final Ver.docx
+/media/*
+!/media/resident_photos/
+/media/resident_photos/*
+!/media/resident_photos/default.png
+/staticfiles/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*~
+
+# Design source files
+*.kra
+
+# Test and tooling output
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
