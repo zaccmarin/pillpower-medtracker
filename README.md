@@ -93,8 +93,8 @@ The original evaluation identifies further work needed for a production system, 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/zaccmarin/A-Level-NEA.git
-cd A-Level-NEA
+git clone https://github.com/zaccmarin/pillpower-medtracker.git
+cd pillpower-medtracker
 ```
 
 ### 2. Create a virtual environment and install dependencies
